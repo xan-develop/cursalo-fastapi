@@ -18,7 +18,8 @@ class User(Document):
         is_root = True
         indexes = [
             [("username", pymongo.ASCENDING)],  # Índice para búsquedas rápidas por nombre de usuario
-            [("email", pymongo.ASCENDING)]      # Índice para búsquedas rápidas por correo electrónico
+            [("email", pymongo.ASCENDING)],      # Índice para búsquedas rápidas por correo electrónico
+            [("role", pymongo.ASCENDING)],
         ]
         
 class Teacher(User):

@@ -42,6 +42,16 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return Token(access_token=encoded_jwt, token_type="bearer")
 
+def create_recovery_pass_token(data: dict, expires_delta: timedelta | None = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.now(timezone.utc) + expires_delta
+    else:
+        expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
 class AuthService:
     """Servicio centralizado para operaciones de autenticación"""
     
@@ -169,6 +179,14 @@ class AuthService:
         """Actualiza la contraseña de un usuario"""
         new_hashed_password = get_password_hash(new_password)
         await self.auth_repo.update_password(user_id, new_hashed_password)
+
+    async def create_recovery_password_token(self, user_id: str) -> str | None:
+        """Crea un token de recuperación de contraseña"""
+        user = await self.auth_repo.get_user_by_id(user_id)
+        if not user:
+            return None
+        token = create_recovery_pass_token({"sub": str(user.id) , "email": user.email , "role": user.role , "expedition_date": datetime.now(timezone.utc).timestamp() , "type": "recovery_password"})
+        return token
 
 # Función para obtener una instancia de AuthService
 def get_auth_service(auth_repo: Annotated[AuthRepo, Depends(get_auth_repo)]) -> AuthService:
