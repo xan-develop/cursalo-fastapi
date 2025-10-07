@@ -29,7 +29,7 @@ async def get_student_by_id(
 @router.get("/", response_model=List[Student])
 async def get_all_students(
     student_service: Annotated[StudentService, Depends(get_student_service)],
-    user: dict = Depends(require_role("teacher"))
+    user: dict = Depends(require_role("student"))
 ):
     """
     Obtiene todos los estudiantes.

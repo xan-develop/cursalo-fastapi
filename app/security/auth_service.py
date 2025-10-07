@@ -200,6 +200,21 @@ class AuthService:
             return None
         token = create_recovery_pass_token({"sub": str(user.id) , "email": user.email , "role": user.role , "expedition_date": datetime.now(timezone.utc).timestamp() , "type": "recovery_password"})
         return token
+    
+    async def create_admin_user(self, password: str) -> User:
+        """Crea un usuario administrador si no existe"""
+        existing_user = await self.auth_repo.get_user_by_username("admin")
+        if existing_user:
+            return existing_user
+        
+        hashed_password = get_password_hash(password)
+        admin_user = User(
+            username="admin",
+            email="admin@example.com",
+            password=hashed_password,
+            role="admin"
+        )
+        return await self.auth_repo.create_user(admin_user)
 
 # Función para obtener una instancia de AuthService
 def get_auth_service(auth_repo: Annotated[AuthRepo, Depends(get_auth_repo)]) -> AuthService:
@@ -213,11 +228,11 @@ async def get_current_user(
     return await auth_service.get_current_user_from_token(token)
 
 def require_role(role: str):
-    def role_checker(user: dict = Depends(get_current_user)):
-        if user["role"] != role:
+    def role_checker(user: TokenData = Depends(get_current_user)):
+        if user.role != role and user.role != "admin":
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="No tienes permisos suficientes",
+                detail="Your role has forbidden access to this resource",
             )
         return user
     return role_checker
@@ -225,11 +240,3 @@ def require_role(role: str):
 async def get_user_role(current_user: Annotated[TokenData, Depends(get_current_user)]):
     return current_user.role
 
-# Funciones de compatibilidad (mantienen la interfaz anterior)
-async def create_teacher_account(teacher_data: TeacherRegistration, auth_repo: Annotated[AuthRepo, Depends(get_auth_repo)]):
-    auth_service = AuthService(auth_repo)
-    return await auth_service.create_teacher_account(teacher_data)
-
-async def login_user(username: str, password: str, auth_repo: Annotated[AuthRepo, Depends(get_auth_repo)]):
-    auth_service = AuthService(auth_repo)
-    return await auth_service.login_user(username, password)

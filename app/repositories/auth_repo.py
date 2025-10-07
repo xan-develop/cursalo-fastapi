@@ -22,6 +22,10 @@ class AuthRepo:
         await student_data.insert()
         return student_data
     
+    async def create_user(self, user_data: User) -> User:
+        await user_data.insert()
+        return user_data
+    
     async def get_all_users(self) -> list[User]:
         users = await User.find_all(with_children=True).to_list()
         return users

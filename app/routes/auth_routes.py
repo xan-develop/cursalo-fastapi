@@ -1,13 +1,13 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
-from models.users import Teacher, TeacherRegistration , StudentRegistration
+from models.users import Teacher, TeacherRegistration , StudentRegistration, User
 from security.auth_service import (
     AuthService,
     get_auth_service,
     get_current_user, 
     Token, 
-    TokenData
+    TokenData,
 )
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
@@ -294,3 +294,24 @@ async def reset_password(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error resetting password: {str(e)}"
         )
+
+@router.post("/create-initial-admin", response_model=User)
+async def create_initial_admin_user(password: str, auth_service: Annotated[AuthService, Depends(get_auth_service)]):
+    """
+    Crea un usuario administrador inicial si no existe.
+
+    - **auth_service**: Servicio de autenticación inyectado.
+
+    Este usuario tendrá las siguientes credenciales:
+    - Username: admin
+    - Email: admin@example.com
+    - Password: admin_password
+    """
+    # Verificar si el usuario ya existe
+    existing_user = await auth_service.auth_repo.get_user_by_email("admin@example.com")
+    if existing_user:
+        return existing_user
+
+    # Crear el usuario administrador
+    admin_user = await auth_service.create_admin_user(password)
+    return admin_user
