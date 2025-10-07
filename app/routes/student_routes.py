@@ -1,7 +1,8 @@
 from typing import Annotated, List
 from fastapi import APIRouter, Depends, HTTPException, status
 from models.users import Student
-from app.services.student_service import StudentService, get_student_service
+from services.student_service import StudentService, get_student_service
+from security.auth_service import TokenData, require_role 
 
 router = APIRouter(prefix="/students", tags=["students"])
 
@@ -27,7 +28,8 @@ async def get_student_by_id(
 
 @router.get("/", response_model=List[Student])
 async def get_all_students(
-    student_service: Annotated[StudentService, Depends(get_student_service)]
+    student_service: Annotated[StudentService, Depends(get_student_service)],
+    user: dict = Depends(require_role("teacher"))
 ):
     """
     Obtiene todos los estudiantes.

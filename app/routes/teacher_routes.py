@@ -1,7 +1,7 @@
 from typing import Annotated, List
 from fastapi import APIRouter, Depends, HTTPException, status
 from models.users import Teacher
-from app.services.teacher_service import TeacherService, get_teacher_service
+from services.teacher_service import TeacherService, get_teacher_service
 from security.auth_service import TokenData, require_role
 router = APIRouter(prefix="/teachers", tags=["teachers"])
 
