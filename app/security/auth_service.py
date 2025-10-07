@@ -6,7 +6,7 @@ from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
 from pwdlib import PasswordHash
 from pydantic import BaseModel
-from models.users import Teacher, TeacherRegistration, User
+from models.users import Teacher, TeacherRegistration, User , StudentRegistration , Student
 from repositories.auth_repo import get_auth_repo, AuthRepo
 
 SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
@@ -19,6 +19,7 @@ class Token(BaseModel):
     
 class TokenData(BaseModel):
     sub: str | None = None
+    username: str | None = None
     email: str | None = None
     role: str | None = None
 
@@ -68,6 +69,27 @@ class AuthService:
         teacher = await self.auth_repo.create_teacher(new_teacher)
         return teacher
 
+    async def create_student_account(self, student_data: StudentRegistration) -> Student:
+        """Crea una nueva cuenta de estudiante"""
+        # Validaciones
+        if await self.auth_repo.get_user_by_email(student_data.email):
+            raise HTTPException(status_code=400, detail="Email already registered")
+        if await self.auth_repo.get_user_by_username(student_data.username):
+            raise HTTPException(status_code=400, detail="Username already taken")
+        if not student_data.password:
+            raise HTTPException(status_code=400, detail="Password cannot be empty")
+        
+        # Hashear contraseña y crear estudiante
+        hashed_password = get_password_hash(student_data.password)
+        student_dict = student_data.model_dump()
+        student_dict["password"] = hashed_password
+        new_student = Student(**student_dict)
+        new_student.role = "student"
+        
+        # Guardar en base de datos
+        student = await self.auth_repo.create_student(new_student)
+        return student
+    
     async def login_user(self, username: str, password: str) -> Token:
         """Autentica un usuario y devuelve un token de acceso"""
         user = await self.auth_repo.get_user_by_username(username)
@@ -82,6 +104,11 @@ class AuthService:
             expires_delta=access_token_expires
         )
         return access_token
+
+    async def log_out_user(self, token: str) -> None:
+        """Cierra la sesión de un usuario (simulado)"""
+        # En un sistema real, se podría implementar una lista de tokens revocados
+        pass
 
     async def get_user_by_username(self, username: str) -> User | None:
         """Obtiene un usuario por su nombre de usuario"""
@@ -108,15 +135,18 @@ class AuthService:
                 
             token_data = TokenData(
                 sub=sub,
+                username=user.username,
                 email=user.email, 
                 role=user.role
             )
         except InvalidTokenError:
             raise credentials_exception
         return token_data
+    
     async def get_all_users(self) -> list[User]:
         """Obtiene todos los usuarios"""
         return await self.auth_repo.get_all_users()
+    
     async def verify_token(self, token: str) -> dict:
         """Verifica la validez de un token JWT"""
         try:
@@ -134,6 +164,11 @@ class AuthService:
                 detail="Could not validate credentials",
                 headers={"WWW-Authenticate": "Bearer"},
             )
+            
+    async def update_password(self, user_id: str, new_password: str) -> None:
+        """Actualiza la contraseña de un usuario"""
+        new_hashed_password = get_password_hash(new_password)
+        await self.auth_repo.update_password(user_id, new_hashed_password)
 
 # Función para obtener una instancia de AuthService
 def get_auth_service(auth_repo: Annotated[AuthRepo, Depends(get_auth_repo)]) -> AuthService:
