@@ -1,0 +1,39 @@
+from beanie import PydanticObjectId
+from models.users import Student
+
+class StudentRepo:
+
+    async def create_student(self, student_data: Student) -> Student:
+        await student_data.insert()
+        return student_data
+
+    async def get_student_by_id(self, student_id: str) -> Student | None:
+        return await Student.get(student_id, with_children=True)
+
+    async def get_student_by_username(self, username: str) -> Student | None:
+        return await Student.find_one(Student.username == username, with_children=True)
+
+    async def get_all_students(self) -> list[Student]:
+        students = await Student.find_all(with_children=True).to_list()
+        return students
+
+    async def update_student(self, student_id: str, update_data: dict) -> Student | None:
+        student = await self.get_student_by_id(student_id)
+        if not student:
+            return None
+        for key, value in update_data.items():
+            if hasattr(student, key):
+                setattr(student, key, value)
+        await student.save()
+        return student
+
+    async def delete_student(self, student_id: str) -> bool:
+        student = await self.get_student_by_id(student_id)
+        if not student:
+            return False
+        await student.delete()
+        return True
+
+# Función para dependency injection
+def get_student_repo() -> StudentRepo:
+    return StudentRepo()

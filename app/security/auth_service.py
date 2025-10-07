@@ -52,6 +52,8 @@ def create_recovery_pass_token(data: dict, expires_delta: timedelta | None = Non
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
+
+
 class AuthService:
     """Servicio centralizado para operaciones de autenticación"""
     
@@ -175,6 +177,17 @@ class AuthService:
                 headers={"WWW-Authenticate": "Bearer"},
             )
             
+    async def verify_role(self, token: str, required_role: str) -> bool:
+        """Verifica si el usuario tiene el rol requerido"""
+        payload = await self.verify_token(token)
+        user_role = payload.get("role")
+        if user_role != required_role:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Operation not permitted",
+            )
+        return True
+            
     async def update_password(self, user_id: str, new_password: str) -> None:
         """Actualiza la contraseña de un usuario"""
         new_hashed_password = get_password_hash(new_password)
@@ -198,6 +211,16 @@ async def get_current_user(
     auth_service: Annotated[AuthService, Depends(get_auth_service)]
 ) -> TokenData:
     return await auth_service.get_current_user_from_token(token)
+
+def require_role(role: str):
+    def role_checker(user: dict = Depends(get_current_user)):
+        if user["role"] != role:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="No tienes permisos suficientes",
+            )
+        return user
+    return role_checker
 
 async def get_user_role(current_user: Annotated[TokenData, Depends(get_current_user)]):
     return current_user.role
