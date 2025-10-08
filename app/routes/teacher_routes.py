@@ -26,7 +26,7 @@ async def get_teacher_by_id(
         raise HTTPException(status_code=404, detail="Teacher not found")
     return TeacherResponse.from_teacher(teacher)
 
-@router.get("/", response_model=List[Teacher])
+@router.get("/", response_model=List[TeacherResponse])
 async def get_all_teachers(
     teacher_service: Annotated[TeacherService, Depends(get_teacher_service)],
     user: dict = Depends(require_role("teacher"))
@@ -41,7 +41,8 @@ async def get_all_teachers(
     - 200: Lista de profesores.
     - 403: Acceso denegado si no es teacher.
     """
-    return await teacher_service.get_all_teachers()
+    all_teachers = await teacher_service.get_all_teachers()
+    return [TeacherResponse.from_teacher(teacher) for teacher in all_teachers]
 
 @router.delete("/{teacher_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_teacher(
