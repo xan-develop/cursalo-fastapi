@@ -11,11 +11,15 @@ def rebuild_models():
         from models.users import Teacher, Student, User
         from models.classes import Class  # Cuando exista
         from models.voucher import Voucher  # Cuando exista
+        from models.enrollment import Enrollment  # Cuando exista
         
         # Reconstruir modelos
         User.model_rebuild()
         Teacher.model_rebuild()
         Student.model_rebuild()
+        Class.model_rebuild()
+        Voucher.model_rebuild()
+        Enrollment.model_rebuild()
         
         print("✅ Modelos reconstruidos correctamente")
         

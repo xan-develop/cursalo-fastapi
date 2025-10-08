@@ -2,7 +2,7 @@ from pymongo import AsyncMongoClient
 from models.users import User, Teacher, Student
 from models.classes import Class
 from models.voucher import Voucher
-from models.enrrolment import Enrollment
+from models.enrollment import Enrollment
 from beanie import init_beanie
 from config.consolelog import logger
     

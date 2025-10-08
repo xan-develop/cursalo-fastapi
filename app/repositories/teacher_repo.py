@@ -8,13 +8,13 @@ class TeacherRepo:
         return teacher_data
 
     async def get_teacher_by_id(self, teacher_id: str) -> Teacher | None:
-        return await Teacher.get(teacher_id, with_children=True)
+        return await Teacher.get(teacher_id, fetch_links=True)
 
     async def get_teacher_by_username(self, username: str) -> Teacher | None:
-        return await Teacher.find_one(Teacher.username == username, with_children=True)
+        return await Teacher.find_one(Teacher.username == username, fetch_links=True)
 
     async def get_all_teachers(self) -> list[Teacher]:
-        teachers = await Teacher.find_all(with_children=True).to_list()
+        teachers = await Teacher.find_all(fetch_links=True).to_list()
         return teachers
 
     async def update_teacher(self, teacher_id: str, update_data: dict) -> Teacher | None:

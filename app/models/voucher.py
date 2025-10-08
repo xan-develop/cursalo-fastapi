@@ -1,9 +1,12 @@
 from beanie import Document, Link
 from datetime import datetime
-from typing import Optional
+from typing import Optional , TYPE_CHECKING
 from pydantic import Field
+
+if TYPE_CHECKING:
+    from models.users import Student
 class Voucher(Document):
-    student: Link["Student"] # type: ignore
+    student: Link["Student"]  
     total_credits: int
     remaining_credits: int
     price: float

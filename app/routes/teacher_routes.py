@@ -1,11 +1,11 @@
 from typing import Annotated, List
 from fastapi import APIRouter, Depends, HTTPException, status
-from models.users import Teacher
+from models.users import Teacher , TeacherResponse
 from services.teacher_service import TeacherService, get_teacher_service
 from security.auth_service import TokenData, require_role
 router = APIRouter(prefix="/teachers", tags=["teachers"])
 
-@router.get("/{teacher_id}", response_model=Teacher)
+@router.get("/{teacher_id}", response_model=TeacherResponse)
 async def get_teacher_by_id(
     teacher_id: str,
     teacher_service: Annotated[TeacherService, Depends(get_teacher_service)]
@@ -21,9 +21,10 @@ async def get_teacher_by_id(
     - 404: Profesor no encontrado.
     """
     teacher = await teacher_service.get_teacher_by_id(teacher_id)
+    
     if not teacher:
         raise HTTPException(status_code=404, detail="Teacher not found")
-    return teacher
+    return TeacherResponse.from_teacher(teacher)
 
 @router.get("/", response_model=List[Teacher])
 async def get_all_teachers(
