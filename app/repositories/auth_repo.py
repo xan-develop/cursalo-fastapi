@@ -1,6 +1,3 @@
-from datetime import timedelta
-from beanie import PydanticObjectId
-from pydantic import ValidationError
 from models.users import User, Teacher, Student
 
 class AuthRepo:

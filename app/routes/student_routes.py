@@ -1,6 +1,6 @@
 from typing import Annotated, List
 from fastapi import APIRouter, Depends, HTTPException, status
-from models.users import Student
+from models.users import Student, StudentResponse, StudentUpdate
 from services.student_service import StudentService, get_student_service
 from security.auth_service import TokenData, require_role 
 
@@ -59,3 +59,26 @@ async def delete_student(
     success = await student_service.delete_student(student_id)
     if not success:
         raise HTTPException(status_code=404, detail="Student not found")
+    
+@router.patch("/{student_id}", response_model=StudentResponse)
+async def update_student(
+    student_id: str,
+    student: StudentUpdate,
+    student_service: Annotated[StudentService, Depends(get_student_service)]
+):
+    """
+    Actualiza un estudiante por ID.
+
+    - **student_id**: ID del estudiante.
+    - **student**: Datos del estudiante a actualizar.
+    - **student_service**: Servicio de estudiante inyectado.
+
+    Respuestas:
+    - 200: Datos actualizados del estudiante.
+    - 404: Estudiante no encontrado.
+    - 400: Datos de estudiante vacíos.
+    """
+    updated_student = await student_service.update_student(student_id,student)
+    if not updated_student:
+        raise HTTPException(status_code=404, detail="Student not found")
+    return updated_student

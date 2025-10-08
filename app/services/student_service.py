@@ -1,5 +1,5 @@
 from repositories.student_repo import get_student_repo, StudentRepo
-from models.users import Student
+from models.users import Student, StudentResponse, StudentUpdate
 
 class StudentService:
     def __init__(self, repo: StudentRepo):
@@ -13,6 +13,30 @@ class StudentService:
 
     async def delete_student(self, student_id: str) -> bool:
         return await self.repo.delete_student(student_id)
+
+    async def update_student(self, student_id: str, student_update: StudentUpdate) -> StudentResponse | None:
+        # Obtener el estudiante actual
+        student_data = await self.repo.get_student_by_id(student_id)
+        if not student_data:
+            raise ValueError("Student not found")
+        
+        # Obtener solo los campos que se van a actualizar (exclude_unset=True ignora campos no enviados)
+        update_fields = student_update.model_dump(exclude_unset=True, exclude_none=True)
+        
+        # Si no hay campos para actualizar, devolver el estudiante sin cambios
+        if not update_fields:
+            raise ValueError("No fields to update")
+        
+        # Actualizar solo los campos proporcionados
+        for field, value in update_fields.items():
+            if hasattr(student_data, field):
+                setattr(student_data, field, value)
+        
+        
+        await self.repo.update_student(student_data)
+        student_response = StudentResponse.from_student(student_data)
+        # Guardar los cambios
+        return student_response
 
 # Función para dependency injection
 def get_student_service() -> StudentService:
