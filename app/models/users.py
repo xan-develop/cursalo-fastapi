@@ -32,10 +32,6 @@ class User(Document):
     @model_validator(mode='before')
     @classmethod
     def handle_none_values_and_decimal128(cls, values):
-        # AGREGAR: Debug temporal
-        if isinstance(values, dict) and values.get('role') == 'student':
-            print(f"DEBUG Student data: {values}")
-        
         def convert_decimal128_recursive(obj):
             if isinstance(obj, dict):
                 for key, value in obj.items():

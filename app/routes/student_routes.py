@@ -7,14 +7,15 @@ else:
     from models.users import Student, StudentResponse, StudentUpdate
 
 from services.student_service import StudentService, get_student_service
-from security.auth_service import require_role 
+from security.auth_service import TokenData, require_role 
 
 router = APIRouter(prefix="/students", tags=["students"])
 
 @router.get("/{student_id}", response_model=StudentResponse)
 async def get_student_by_id(
     student_id: str,
-    student_service: Annotated[StudentService, Depends(get_student_service)]
+    student_service: Annotated[StudentService, Depends(get_student_service)],
+    user: dict = Depends(require_role("student"))
 ):
     """
     Obtiene un estudiante por ID.
@@ -56,7 +57,8 @@ async def get_all_students(
 @router.delete("/{student_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_student(
     student_id: str,
-    student_service: Annotated[StudentService, Depends(get_student_service)]
+    student_service: Annotated[StudentService, Depends(get_student_service)],
+    user: dict = Depends(require_role("student"))
 ):
     """
     Elimina un estudiante del sistema.
@@ -79,7 +81,8 @@ async def delete_student(
 async def update_student(
     student_id: str,
     student: StudentUpdate,
-    student_service: Annotated[StudentService, Depends(get_student_service)]
+    student_service: Annotated[StudentService, Depends(get_student_service)],
+    user: TokenData = Depends(require_role("student"))
 ):
     """
     Actualiza parcialmente los datos de un estudiante.
@@ -96,6 +99,8 @@ async def update_student(
     Excepciones:
     - HTTPException: Si el estudiante no existe o los datos son inválidos.
     """
+    if user.sub != student_id:
+        raise HTTPException(status_code=403, detail="Operation forbidden: cannot update another student's data")
     updated_student = await student_service.update_student(student_id,student)
     if not updated_student:
         raise HTTPException(status_code=404, detail="Student not found")
