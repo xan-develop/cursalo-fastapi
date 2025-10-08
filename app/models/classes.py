@@ -75,8 +75,8 @@ class ClassResponse(ClassCreateRequest):
         return cls(
             title=class_model.title,
             description=class_model.description,
-            teacher_id=str(class_model.teacher.id),  # Asumiendo que teacher es un Link a Teacher
-            teacher_name=class_model.teacher.username,
+            teacher_id=str(class_model.teacher.id),  # type: ignore
+            teacher_name=class_model.teacher.username, # type: ignore
             enrolled_students_count=len(class_model.enrolled_students),
             price=class_model.price,
             allow_voucher=class_model.allow_voucher,
