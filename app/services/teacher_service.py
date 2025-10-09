@@ -8,7 +8,6 @@ class TeacherService:
     async def get_teacher_by_id(self, teacher_id: str) -> Teacher | None:
         return await self.repo.get_teacher_by_id(teacher_id)
 
-
     async def get_all_teachers(self) -> list[Teacher]:
         return await self.repo.get_all_teachers()
 

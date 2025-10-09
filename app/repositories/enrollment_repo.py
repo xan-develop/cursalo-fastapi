@@ -23,7 +23,7 @@ class EnrollmentRepo:
         from beanie import PydanticObjectId
         try:
             student_object_id = PydanticObjectId(student_id)
-            # Usar la estructura correcta para buscar por referencia MongoDB
+
             enrollments = await Enrollment.find(Enrollment.student.id == student_object_id, fetch_links=True).to_list() # type: ignore # Documentacion de beanie sobre referencias
             return enrollments
         except Exception as e:

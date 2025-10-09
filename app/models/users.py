@@ -81,7 +81,7 @@ class StudentRegistration(BaseModel):
     address: Optional[Address] = None
     password: str
 
-# Response models para evitar exponer campos sensibles y referencias circulares
+# Response models para evitar referencias circulares
 class TeacherResponse(BaseModel):
     id: str
     username: str

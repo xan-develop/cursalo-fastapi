@@ -20,10 +20,9 @@ class StudentService:
         if not student_data:
             raise ValueError("Student not found")
         
-        # Obtener solo los campos que se van a actualizar (exclude_unset=True ignora campos no enviados)
+        # Obtener solo los campos que se van a actualizar
         update_fields = student_update.model_dump(exclude_unset=True, exclude_none=True)
         
-        # Si no hay campos para actualizar, devolver el estudiante sin cambios
         if not update_fields:
             raise ValueError("No fields to update")
         
@@ -35,16 +34,17 @@ class StudentService:
         
         await self.repo.update_student(student_data)
         student_response = StudentResponse.from_student(student_data)
-        # Guardar los cambios
         return student_response
     
     async def add_voucher(self, student_id: str, amount: int) -> Student | None:
+        """Agrega bonos/tickets a un estudiante"""
         student = await self.repo.get_student_by_id(student_id)
         if not student:
             raise ValueError("Student not found")
         return await self.repo.add_voucher(student, amount)
 
     async def decrease_voucher(self, student_id: str, amount: int) -> Student | None:
+        """Disminuye bonos/tickets de un estudiante"""
         student = await self.repo.get_student_by_id(student_id)
         if not student:
             raise ValueError("Student not found")
@@ -53,7 +53,7 @@ class StudentService:
         if amount < 0:
             raise ValueError("Amount must be positive")
         if amount == 0:
-            return student  # No changes needed for zero amount
+            return student  
         if amount > student.voucher:
             raise ValueError("Cannot decrease voucher below zero")
         return await self.repo.decrease_voucher(student, amount)

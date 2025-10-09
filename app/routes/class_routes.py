@@ -26,16 +26,16 @@ async def create_class(
         created_class = await class_service.create_class(class_request)
         return ClassResponse.from_model(created_class)
     except ValueError as e:
-        # Capturar el ValueError del servicio y convertirlo a HTTPException
+        # Captura el ValueError del servicio y convertirlo a HTTPException
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=str(e)
         )
     except Exception as e:
-        # Capturar cualquier otro error inesperado
+        # Captura cualquier otro error
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error interno del servidor al crear la clase: {str(e)}"
+            detail=f"Internal Server Error: {str(e)}"
             
         )
 
@@ -68,7 +68,7 @@ async def get_all_classes(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error al obtener las clases"
+            detail=f"Internal Server Error: {str(e)}"
         )
 
 @router.get("/future", response_model=List[ClassResponse])
@@ -91,7 +91,7 @@ async def get_all_future_classes(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error al obtener las clases futuras"
+            detail=f"Internal Server Error: {str(e)}"
         )
 
 @router.get("/{class_id}", response_model=Class)
@@ -115,12 +115,11 @@ async def get_class_by_id(
             raise HTTPException(status_code=404, detail="Clase no encontrada")
         return class_item
     except HTTPException:
-        # Re-raise HTTPExceptions para que mantengan su status code
         raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error al obtener la clase"
+            detail=f"Internal Server Error: {str(e)}"
         )
 
 @router.put("/{class_id}", response_model=Class)
@@ -151,7 +150,7 @@ async def update_class(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error al actualizar la clase"
+            detail=f"Internal Server Error: {str(e)}"
         )
 
 @router.delete("/{class_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -173,11 +172,10 @@ async def delete_class(
     try:
         success = await class_service.delete_class(class_id)
         if not success:
-            raise HTTPException(status_code=404, detail="Clase no encontrada")
+            raise HTTPException(status_code=404, detail="Class not found")
     except HTTPException:
         raise
     except ValueError as e:
-        # Manejar errores de validación (ej: clase con estudiantes inscritos)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e)
@@ -185,6 +183,6 @@ async def delete_class(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error al eliminar la clase"
+            detail=f"Internal Server Error: {str(e)}"
         )
 

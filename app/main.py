@@ -14,7 +14,7 @@ async def lifespan(app: FastAPI):
     await client.init()
     rebuild_models()
     yield
-    # Cerrar conexiones u otros recursos si es necesario
+    # Cerrar conexiones 
 
 app = FastAPI(lifespan=lifespan)
 # Reconstruir modelos al iniciar la aplicación

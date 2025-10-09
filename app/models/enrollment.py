@@ -36,10 +36,10 @@ class EnrollmentResponse(BaseModel):
     def from_enrollment(cls, enrollment: Enrollment) -> "EnrollmentResponse":
         return cls(
             id=str(enrollment.id),
-            student_id=str(enrollment.student.id),
-            class_id=str(enrollment.class_.id),
-            student_name=enrollment.student.full_name or enrollment.student.username,
-            class_title=enrollment.class_.title,
+            student_id=str(enrollment.student.id), # type: ignore Documentacion de beanie sobre referencias
+            class_id=str(enrollment.class_.id), # type: ignore Documentacion de beanie sobre referencias
+            student_name=enrollment.student.full_name or enrollment.student.username, # type: ignore Documentacion de beanie sobre referencias
+            class_title=enrollment.class_.title, # type: ignore Documentacion de beanie sobre referencias
             payment_type=enrollment.payment_type,
             enrolled_at=enrollment.enrolled_at
         )

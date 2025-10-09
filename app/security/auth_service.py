@@ -98,7 +98,6 @@ class AuthService:
         new_student = Student(**student_dict)
         new_student.role = "student"
         
-        # Guardar en base de datos
         student = await self.auth_repo.create_student(new_student)
         return student
     
@@ -119,7 +118,7 @@ class AuthService:
 
     async def log_out_user(self, token: str) -> None:
         """Cierra la sesión de un usuario (simulado)"""
-        # En un sistema real, se podría implementar una lista de tokens revocados
+        ## TODO: Implementar revocacion de tokens
         pass
 
     async def get_user_by_username(self, username: str) -> User | None:
@@ -140,7 +139,7 @@ class AuthService:
             if email is None:
                 raise credentials_exception
                 
-            # Verificar que el usuario existe en la base de datos
+            # Verificar que el usuario existe
             user = await self.auth_repo.get_user_by_email(email)
             if user is None:
                 raise credentials_exception
@@ -216,11 +215,11 @@ class AuthService:
         )
         return await self.auth_repo.create_user(admin_user)
 
-# Función para obtener una instancia de AuthService
+# Función para obtener instancia de AuthService
 def get_auth_service(auth_repo: Annotated[AuthRepo, Depends(get_auth_repo)]) -> AuthService:
     return AuthService(auth_repo)
 
-# Función para obtener el usuario actual usando AuthService
+# Función para validaciones de seguridad en rutas
 async def get_current_user(
     token: Annotated[str, Depends(oauth2_scheme)],
     auth_service: Annotated[AuthService, Depends(get_auth_service)]

@@ -21,7 +21,7 @@ class EnrollmentService:
         self.class_repo = class_repo
 
     async def create_enrollment_voucher(self, enrollment_data: EnrollmentRequest) -> EnrollmentResponse:
-
+        """Crea una nueva inscripción usando un tocket/bono de estudiante"""
         selected_class = await self.class_repo.get_by_id(enrollment_data.class_id)
         student = await self.student_repo.get_student_by_id(enrollment_data.student_id)
         
@@ -47,6 +47,7 @@ class EnrollmentService:
         return EnrollmentResponse.from_enrollment(created_enrollment)
 
     async def get_enrollments_by_student(self, student_id: str) -> List[EnrollmentResponse]:
+        """Obtiene todas las inscripciones de un estudiante por su ID"""
         student = await self.student_repo.get_student_by_id(student_id)
         if not student:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Student not found.")
@@ -54,7 +55,7 @@ class EnrollmentService:
         enrollments = await self.enrollment_repo.get_enrollments_by_student(student_id)
         return [EnrollmentResponse.from_enrollment(enrollment) for enrollment in enrollments]
     
-
+# Función para dependencia de EnrollmentService
 def get_enrollment_service() -> EnrollmentService:
     enrollment_repo = get_enrollment_repo()
     student_repo = get_student_repo()

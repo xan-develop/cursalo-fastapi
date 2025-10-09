@@ -62,30 +62,30 @@ class ClassValidator:
     def validate_teacher_availability(existing_classes: List[Class], teacher: Teacher) -> None:
         """Valida que el profesor no tenga clases en el mismo horario"""
         for existing_class in existing_classes:
-            if existing_class.teacher.id == teacher.id:
+            if existing_class.teacher.id == teacher.id: # type: ignore Documentacion de beanie sobre referencias
                 raise ValueError("The teacher already has a class scheduled at this time")
 
     @staticmethod
     def validate_class_not_enrolled(class_item: Class) -> None:
         """Valida que la clase no tenga estudiantes inscritos para poder eliminarla"""
         if len(class_item.enrolled_students) > 0:
-            raise ValueError("No se puede eliminar una clase con estudiantes inscritos")
+            raise ValueError("Cant delete a class with enrolled students")
 
     @staticmethod
     def validate_search_term(title: str) -> str:
         """Valida el término de búsqueda"""
         if not title or len(title.strip()) < 2:
-            raise ValueError("El término de búsqueda debe tener al menos 2 caracteres")
+            raise ValueError("The search term must be at least 2 characters long")
         return title.strip()
 
     @staticmethod
     def validate_price_range(min_price: Decimal, max_price: Decimal) -> None:
         """Valida el rango de precios"""
         if min_price < 0 or max_price < 0:
-            raise ValueError("Los precios no pueden ser negativos")
+            raise ValueError("Prices must be non-negative")
         
         if min_price > max_price:
-            raise ValueError("El precio mínimo no puede ser mayor al máximo")
+            raise ValueError("The minimum price cannot be greater than the maximum price")
 
     @staticmethod
     def _has_available_spots(class_item: Class) -> bool:

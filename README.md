@@ -108,11 +108,12 @@ Una vez ejecutada la aplicación, puedes acceder a:
 #### 🔐 Autenticación (`/auth`)
 
 ```http
-POST /auth/register/teacher    # Registrar profesor
-POST /auth/register/student    # Registrar estudiante  
-POST /auth/login              # Iniciar sesión
-POST /auth/refresh-token      # Renovar token
-GET  /auth/me                 # Obtener usuario actual
+POST  /auth/register/teacher   # Registrar profesor
+POST  /auth/register/student   # Registrar estudiante  
+POST  /auth/login             # Iniciar sesión
+GET   /auth/me                # Obtener usuario actual
+GET   /auth/users             # Listar todos los usuarios (requiere auth)
+PATCH /auth/update-password   # Actualizar contraseña del usuario actual
 ```
 
 #### 📚 Clases (`/classes`)
@@ -120,28 +121,34 @@ GET  /auth/me                 # Obtener usuario actual
 ```http
 GET    /classes               # Listar todas las clases
 POST   /classes               # Crear nueva clase (solo profesores)
+GET    /classes/future        # Obtener clases futuras
 GET    /classes/{id}          # Obtener clase específica
-PUT    /classes/{id}          # Actualizar clase
-DELETE /classes/{id}          # Eliminar clase
-POST   /classes/{id}/enroll   # Inscribirse en clase
+PUT    /classes/{id}          # Actualizar clase (solo profesores)
+DELETE /classes/{id}          # Eliminar clase (solo profesores)
+```
+
+#### 📝 Inscripciones (`/enrollments`)
+
+```http
+POST /enrollments             # Crear nueva inscripción (solo estudiantes)
+GET  /enrollments/student/{student_id}  # Obtener inscripciones de un estudiante
 ```
 
 #### 👨‍🎓 Estudiantes (`/students`)
 
 ```http
-GET    /students              # Listar estudiantes
+GET    /students              # Listar estudiantes (requiere auth)
 GET    /students/{id}         # Obtener estudiante específico
-PUT    /students/{id}         # Actualizar perfil de estudiante
-GET    /students/{id}/classes # Clases del estudiante
+PATCH  /students/{id}         # Actualizar parcialmente perfil de estudiante
+DELETE /students/{id}         # Eliminar estudiante (solo estudiantes)
 ```
 
 #### 👨‍🏫 Profesores (`/teachers`)
 
 ```http
-GET    /teachers              # Listar profesores
+GET    /teachers              # Listar profesores (requiere auth)
 GET    /teachers/{id}         # Obtener profesor específico
-PUT    /teachers/{id}         # Actualizar perfil de profesor
-GET    /teachers/{id}/classes # Clases del profesor
+DELETE /teachers/{id}         # Eliminar profesor (solo profesores)
 ```
 
 
@@ -172,7 +179,6 @@ El sistema utiliza **MongoDB** con las siguientes colecciones:
 - **enrollments**: Inscripciones de estudiantes
 - **vouchers**: Sistema de descuentos y vouchers
 
-Ver [dbdesing.md](dbdesing.md) para más detalles del esquema.
 
 ## 👨‍💻 Autor
 

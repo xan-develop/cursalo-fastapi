@@ -139,7 +139,7 @@ def is_valid_teacher(obj: Any) -> TypeGuard[Teacher]:
 
 ## Conclusión
 
-En **nuestro proyecto**, los comentarios `# type: ignore` son **completamente legítimos** porque:
+En **el proyecto**, los comentarios `# type: ignore` son **completamente legítimos** porque:
 
 1. **✅ El código funciona perfectamente** - La aplicación FastAPI ejecuta sin errores
 2. **✅ Son falsos positivos** - Pylance no comprende completamente Beanie

@@ -34,14 +34,14 @@ class ClassService:
             raise ValueError("This teacher does not exist")
         if class_data.teacher_id != str(teacher.id):
             raise ValueError("Cant create class for a non-existing teacher")
-        # Validar fecha de inicio
+
         start_date_aware = ClassValidator.validate_class_start_date(class_data.start_date)
         
         ClassValidator.validate_duration(class_data.duration_minutes)
         ClassValidator.validate_price(class_data.price)
         ClassValidator.validate_max_students(class_data.max_students)
         
-        # Calcular end_date con timezone
+        # Calcular fecha final para qu eno coincida con otras clases
         end_date_aware = start_date_aware + timedelta(minutes=class_data.duration_minutes)
         
         # Verificar disponibilidad del profesor
@@ -82,7 +82,7 @@ class ClassService:
         if not class_item:
             return None
 
-        # Aplicar solo los campos que no son None
+        # Aplicar solo los campos recibidos de la peticion
         update_dict = update_data.model_dump(exclude_unset=True)
         for key, value in update_dict.items():
             setattr(class_item, key, value)

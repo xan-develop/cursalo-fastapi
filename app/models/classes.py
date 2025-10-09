@@ -41,7 +41,7 @@ class ClassCreateRequest(BaseModel):
     start_date: datetime
     duration_minutes: int
 
-    # Validador para el request también
+    # Validador para el request
     @field_validator('price', mode='before')
     @classmethod
     def convert_decimal128_to_decimal(cls, v):
@@ -58,7 +58,7 @@ class ClassUpdateRequest(BaseModel):
     start_date: Optional[datetime] = None
     duration_minutes: Optional[int] = None
     
-    # Validador para el update request también
+    # Validador para el update 
     @field_validator('price', mode='before')
     @classmethod
     def convert_decimal128_to_decimal(cls, v):
