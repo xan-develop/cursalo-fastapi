@@ -37,6 +37,26 @@ class StudentService:
         student_response = StudentResponse.from_student(student_data)
         # Guardar los cambios
         return student_response
+    
+    async def add_voucher(self, student_id: str, amount: int) -> Student | None:
+        student = await self.repo.get_student_by_id(student_id)
+        if not student:
+            raise ValueError("Student not found")
+        return await self.repo.add_voucher(student, amount)
+
+    async def decrease_voucher(self, student_id: str, amount: int) -> Student | None:
+        student = await self.repo.get_student_by_id(student_id)
+        if not student:
+            raise ValueError("Student not found")
+        if student.voucher < amount:
+            raise ValueError("Insufficient voucher balance")
+        if amount < 0:
+            raise ValueError("Amount must be positive")
+        if amount == 0:
+            return student  # No changes needed for zero amount
+        if amount > student.voucher:
+            raise ValueError("Cannot decrease voucher below zero")
+        return await self.repo.decrease_voucher(student, amount)
 
 # Función para dependency injection
 def get_student_service() -> StudentService:

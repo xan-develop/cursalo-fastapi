@@ -5,13 +5,12 @@ from pydantic import Field
 
 if TYPE_CHECKING:
     from models.users import Student
-class Voucher(Document):
-    student: Link["Student"]  
-    total_credits: int
-    remaining_credits: int
-    price: float
+    from models.classes import Class
+
+class VoucherHistory(Document):
+    student: Link["Student"]
+    class_item: Link["Class"]
     created_at: datetime = Field(default_factory=datetime.now)
-    expires_at: Optional[datetime] = None
 
     class Settings:
-        name = "vouchers"
+        name = "voucher_history"

@@ -15,6 +15,10 @@ class ClassRepo:
 
     async def get_all(self) -> List[Class]:
         return await Class.find_all(fetch_links=True).to_list()
+    
+    async def get_all_future_classes(self) -> List[Class]:
+        current_time = datetime.now().astimezone()
+        return await Class.find(Class.start_date > current_time, fetch_links=True).to_list()
 
     async def update(self, class_item: Class) -> Class:
         await class_item.save()
@@ -22,6 +26,11 @@ class ClassRepo:
 
     async def delete(self, class_item: Class) -> None:
         await class_item.delete()
+
+    async def add_student(self, class_item: Class, student: Student) -> None:
+        if student.id not in class_item.enrolled_students:
+            class_item.enrolled_students.append(student) # type: ignore
+            await class_item.save()
 
     async def find_by_teacher(self, teacher: Teacher) -> List[Class]:
         return await Class.find(Class.teacher == teacher, fetch_links=True).to_list()

@@ -71,6 +71,10 @@ class ClassService:
     async def get_all_classes(self) -> List[Class]:
         """Obtiene todas las clases"""
         return await self.class_repo.get_all()
+    
+    async def get_all_future_classes(self) -> List[Class]:
+        """Obtiene todas las clases futuras"""
+        return await self.class_repo.get_all_future_classes()
 
     async def update_class(self, class_id: str, update_data: ClassUpdateRequest) -> Class | None:
         """Actualiza una clase existente"""
@@ -135,33 +139,7 @@ class ClassService:
         ClassValidator.validate_price_range(min_price, max_price)
         return await self.class_repo.find_by_price_range(float(min_price), float(max_price))
 
-    async def get_class_enrollment_count(self, class_id: str) -> int:
-        """Obtiene el número de estudiantes inscritos en una clase"""
-        class_item = await self.class_repo.get_by_id(class_id)
-        if not class_item:
-            return 0
-        return len(class_item.enrolled_students)
-
-    async def is_class_full(self, class_id: str) -> bool:
-        """Verifica si una clase está llena"""
-        class_item = await self.class_repo.get_by_id(class_id)
-        if not class_item:
-            return True
-        
-        return not ClassValidator.has_available_spots(class_item)
-
-    async def can_enroll_student(self, class_id: str, student_id: str) -> tuple[bool, str]:
-        """Verifica si un estudiante puede inscribirse a una clase"""
-        class_item = await self.class_repo.get_by_id(class_id)
-        student = await self.auth_repo.get_student_by_id(student_id)
-        
-        return ClassValidator.validate_class_enrollment(class_item, student)
-
-    def _has_available_spots(self, class_item: Class) -> bool:
-        """Verifica si una clase tiene cupos disponibles"""
-        if class_item.max_students is None:
-            return True
-        return len(class_item.enrolled_students) < class_item.max_students
+    
 
 # Función para dependency injection
 def get_class_service() -> ClassService:

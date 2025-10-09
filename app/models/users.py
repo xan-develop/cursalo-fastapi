@@ -9,7 +9,6 @@ from beanie import Document, Link
 # Import condicional para evitar referencias circulares
 if TYPE_CHECKING:
     from models.classes import Class
-    from models.voucher import Voucher
 
 class Address(BaseModel):
     street: str
@@ -63,7 +62,7 @@ class Teacher(User):
     
 class Student(User):
     role: str = "student"  # fijo
-    vouchers: List[Link["Voucher"]] = Field(default_factory=list) 
+    voucher: int = 0
     enrolled_classes: List[Link["Class"]] = Field(default_factory=list) 
 
 class TeacherRegistration(BaseModel):
@@ -121,8 +120,8 @@ class StudentResponse(BaseModel):
     address: Optional[Address] = None
     full_name: Optional[str] = None
     role: str
-    enrolled_classes_count: int = 0  
-    vouchers_count: int = 0
+    enrolled_classes_count: int = 0
+    voucher: int = 0
     created_at: datetime
     is_active: bool
 
@@ -138,7 +137,7 @@ class StudentResponse(BaseModel):
             full_name=student.full_name,
             role=student.role,
             enrolled_classes_count=len(student.enrolled_classes) if student.enrolled_classes else 0,
-            vouchers_count=len(student.vouchers) if student.vouchers else 0,
+            voucher=student.voucher,
             created_at=student.created_at,
             is_active=student.is_active,
             phone=student.phone,

@@ -67,12 +67,14 @@ class ClassUpdateRequest(BaseModel):
         return v
 
 class ClassResponse(ClassCreateRequest):
+    id: str
     teacher_name: str
     enrolled_students_count: int = 0
 
     @classmethod
     def from_model(cls, class_model: Class) -> "ClassResponse":
         return cls(
+            id=str(class_model.id),
             title=class_model.title,
             description=class_model.description,
             teacher_id=str(class_model.teacher.id),  # type: ignore

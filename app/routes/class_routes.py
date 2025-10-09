@@ -2,7 +2,7 @@ from typing import Annotated, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from models.classes import Class, ClassCreateRequest, ClassUpdateRequest , ClassResponse
 from services.class_service import ClassService, get_class_service
-from security.auth_service import require_role
+from security.auth_service import require_role , get_current_user
 
 router = APIRouter(prefix="/classes", tags=["classes"])
 
@@ -69,6 +69,29 @@ async def get_all_classes(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error al obtener las clases"
+        )
+
+@router.get("/future", response_model=List[ClassResponse])
+async def get_all_future_classes(
+    class_service: Annotated[ClassService, Depends(get_class_service)],
+    user: dict = Depends(get_current_user)
+):
+    """
+    Obtiene todas las clases futuras.
+
+    - **class_service**: Servicio de clases inyectado.
+
+    Respuestas:
+    - 200: Lista de clases futuras.
+    """
+    try:
+        classes = await class_service.get_all_future_classes()
+        class_response = [ClassResponse.from_model(c) for c in classes]
+        return class_response
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error al obtener las clases futuras"
         )
 
 @router.get("/{class_id}", response_model=Class)

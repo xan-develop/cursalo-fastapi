@@ -6,6 +6,7 @@ from routes.auth_routes import router as auth_router
 from routes.student_routes import router as student_router
 from routes.teacher_routes import router as teacher_router
 from routes.class_routes import router as class_router
+from routes.enrollment_routes import router as enrollment_router
 from models import rebuild_models
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -22,6 +23,7 @@ app.include_router(auth_router)
 app.include_router(student_router)
 app.include_router(teacher_router)
 app.include_router(class_router)
+app.include_router(enrollment_router)
 
 @app.get("/")
 async def root():

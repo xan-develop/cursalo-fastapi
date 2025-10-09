@@ -1,8 +1,8 @@
 from beanie import PydanticObjectId
-from app.models.enrollment import Enrollment
+from models.enrollment import Enrollment
 from models.classes import Class
 from models.users import Student
-from models.voucher import Voucher
+from models.voucher_history import VoucherHistory
 from typing import List, Optional, Literal
 
 class EnrollmentRepo:
@@ -20,11 +20,15 @@ class EnrollmentRepo:
 
     async def get_enrollments_by_student(self, student_id: str) -> List[Enrollment]:
         """Obtiene todas las inscripciones de un estudiante"""
-        student = await Student.get(student_id)
-        if not student:
+        from beanie import PydanticObjectId
+        try:
+            student_object_id = PydanticObjectId(student_id)
+            # Usar la estructura correcta para buscar por referencia MongoDB
+            enrollments = await Enrollment.find(Enrollment.student.id == student_object_id, fetch_links=True).to_list() # type: ignore # Documentacion de beanie sobre referencias
+            return enrollments
+        except Exception as e:
+            print(f"Error al buscar enrollments: {e}")
             return []
-        enrollments = await Enrollment.find(Enrollment.student == student, fetch_links=True).to_list()
-        return enrollments
 
     async def get_enrollments_by_class(self, class_id: str) -> List[Enrollment]:
         """Obtiene todas las inscripciones de una clase"""
@@ -33,51 +37,6 @@ class EnrollmentRepo:
             return []
         enrollments = await Enrollment.find(Enrollment.class_ == class_item, fetch_links=True).to_list()
         return enrollments
-
-    async def enroll_student(self, student_id: str, class_id: str, payment_type: Literal["direct", "voucher"], voucher_id: Optional[str] = None) -> Enrollment | None:
-        """Inscribe un estudiante en una clase"""
-        # Verificar que existan el estudiante y la clase
-        student = await Student.get(student_id)
-        class_item = await Class.get(class_id)
-        
-        if not student or not class_item:
-            return None
-
-        # Verificar si ya existe una inscripción
-        existing_enrollment = await Enrollment.find_one(
-            Enrollment.student == student,
-            Enrollment.class_ == class_item
-        )
-        if existing_enrollment:
-            return None
-
-        # Verificar cupos disponibles si hay límite
-        if class_item.max_students:
-            current_enrollments = await self.get_enrollments_by_class(class_id)
-            if len(current_enrollments) >= class_item.max_students:
-                return None
-
-        # Manejar voucher si se especifica
-        voucher = None
-        if payment_type == "voucher" and voucher_id:
-            voucher = await Voucher.get(voucher_id)
-            if not voucher:
-                return None
-
-        # Crear la inscripción - en Beanie los Links se pueden asignar directamente
-        enrollment_data = {
-            "student": student,
-            "class_": class_item,
-            "payment_type": payment_type
-        }
-        
-        if voucher:
-            enrollment_data["voucher_used"] = voucher
-            
-        enrollment = Enrollment(**enrollment_data)
-        
-        await enrollment.insert()
-        return enrollment
 
     async def unenroll_student(self, student_id: str, class_id: str) -> bool:
         """Desinscribe un estudiante de una clase"""
