@@ -12,12 +12,12 @@ from models import rebuild_models
 async def lifespan(app: FastAPI):
     logger.info("Iniciando aplicación nuevo logger")
     await client.init()
+    # Reconstruir modelos al iniciar la aplicación
     rebuild_models()
     yield
     # Cerrar conexiones 
 
 app = FastAPI(lifespan=lifespan)
-# Reconstruir modelos al iniciar la aplicación
 
 app.include_router(auth_router)
 app.include_router(student_router)
